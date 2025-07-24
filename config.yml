@@ -1,0 +1,9 @@
+api_token: ""
+host_url: ""
+listen_port: 443
+cache_size: 10000
+debug: true
+log_level: "debug"
+log_file: "logs/bot.log"
+model_instance_urls:
+  - "http://your-machine:6029"
