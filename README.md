@@ -114,8 +114,6 @@ Planned support for:
 ### Product
 
 - MAU, DAU, Retention
-- Active users
-- Engagement depth
 
 ## Telegram Bot
 
@@ -247,8 +245,6 @@ python3 run.py
 ### Продуктовые
 
 - MAU, DAU, Retention
-- Активные пользователи
-- Глубина вовлеченности
 
 ## Telegram-бот
 
