@@ -2,11 +2,9 @@ package botwork
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"tg-bot-voice-to-text/src/utils"
 	"time"
 
@@ -37,26 +35,14 @@ func (w WebHookBot) Start(ctx context.Context, hostURL, listenAddr string) error
 	mux := http.NewServeMux()
 	mux.HandleFunc("/webhook", w.webhookHandler)
 
-	cfg := &tls.Config{
-		MinVersion:               tls.VersionTLS12,
-		PreferServerCipherSuites: true,
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		},
-	}
-
 	server := &http.Server{
-		Addr:      listenAddr,
-		Handler:   mux,
-		TLSConfig: cfg,
+		Addr:    listenAddr,
+		Handler: mux,
 	}
 
 	errChan := make(chan error, 1)
 	go func() {
-		err := server.ListenAndServeTLS("webhook.pem", "webhook.key")
+		err := server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
 			errChan <- fmt.Errorf("error starting HTTPS server: %v", err)
 		}
@@ -100,18 +86,7 @@ func (e WebHookBot) webhookHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e WebHookBot) setWebhook(webhookURL string) error {
-	certFile, err := os.Open("webhook.pem")
-	if err != nil {
-		return fmt.Errorf("failed to open cert file: %v", err)
-	}
-
-	// Do not close the certFile manually, as tgbotapi manages the file itself
-	//! defer utils.CloserErrorHandle(certFile, "error closing cert file")
-
-	webhook, err := tgbotapi.NewWebhookWithCert(webhookURL, tgbotapi.FileReader{
-		Name:   "webhook.pem",
-		Reader: certFile,
-	})
+	webhook, err := tgbotapi.NewWebhook(webhookURL)
 	if err != nil {
 		return fmt.Errorf("error creating webhook: %v", err)
 	}
