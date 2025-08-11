@@ -50,9 +50,9 @@ func (w WebHookBot) Start(ctx context.Context, hostURL, listenAddr string) error
 
 	<-time.After(1 * time.Second) // Wait for server to start
 
-	if err := w.setWebhook(fmt.Sprintf("https://%s/webhook", hostURL)); err != nil {
-		return err
-	}
+	// if err := w.setWebhook(fmt.Sprintf("https://%s/webhook", hostURL)); err != nil {
+	// 	return err
+	// }
 
 	select {
 	case <-ctx.Done():
