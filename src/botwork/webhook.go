@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"tg-bot-voice-to-text/src/utils"
-	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sirupsen/logrus"
@@ -48,7 +47,7 @@ func (w WebHookBot) Start(ctx context.Context, hostURL, listenAddr string) error
 		}
 	}()
 
-	<-time.After(1 * time.Second) // Wait for server to start
+	// <-time.After(1 * time.Second) // Wait for server to start
 
 	// if err := w.setWebhook(fmt.Sprintf("https://%s/webhook", hostURL)); err != nil {
 	// 	return err
