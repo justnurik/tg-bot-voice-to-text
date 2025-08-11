@@ -33,7 +33,7 @@ func NewWebHookBot(apiToken string, uh UpdateHandler, debug bool) (*WebHookBot, 
 
 func (w WebHookBot) Start(ctx context.Context, hostURL, listenAddr string) error {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/webhook", w.webhookHandler)
+	mux.HandleFunc("/webhook/bot1", w.webhookHandler)
 
 	server := &http.Server{
 		Addr:    listenAddr,
