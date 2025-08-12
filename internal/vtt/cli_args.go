@@ -11,7 +11,7 @@ func GetCLIArgs() *CLIArgs {
 	var c CLIArgs
 
 	flag.StringVar(&c.LoggerConfigPath, "logger-config-path", "./configs/logger.yml", "")
-	flag.StringVar(&c.BotConfigPath, "bot-config-path", "./configs/tg_bot.yml", "")
+	flag.StringVar(&c.BotConfigPath, "bot-config-path", "./configs/bot.yml", "")
 
 	flag.Parse()
 
