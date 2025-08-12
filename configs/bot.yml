@@ -1,0 +1,10 @@
+mode: "webhook"
+name: "analyzerbot"
+listen_addr: ":443"
+host_url: "bot.example.com"
+debug: false
+timeout: 60
+cert_path: "/etc/certs/webhook.pem"
+key_path: "/etc/certs/webhook.key"
+model_urls:
+  - "http://your-machine:6029"

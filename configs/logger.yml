@@ -1,0 +1,16 @@
+add-stacktrace: true
+stacktrace-log-level: error
+add-caller: true
+console: true
+console-log-level: info
+log-files-config:
+- file-path: logs/bot1.log
+  log-level: info
+  max-size: 1024
+  max-backups: 2
+  max-age: 30
+- file-path: logs/bot2.log
+  log-level: warn
+  max-size: 1024
+  max-backups: 2
+  max-age: 30 

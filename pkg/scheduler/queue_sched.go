@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"tg-bot-voice-to-text/src/queue"
+	"tg-bot-voice-to-text/pkg/queue"
 )
 
 type NamedWorkerSchedulerQueue[K any] struct {
