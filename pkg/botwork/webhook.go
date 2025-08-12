@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	bodyLogSize = 100
+	bodyLogSize = 1024
 )
 
 type WebHookBot struct {
@@ -121,7 +121,7 @@ func (w WebHookBot) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		bodyBytes, _ := io.ReadAll(io.LimitReader(r.Body, bodyLogSize))
+		bodyBytes, _ := io.ReadAll(r.Body)
 		r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 
 		w.logger.Info("incoming webhook request",
