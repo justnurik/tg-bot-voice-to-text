@@ -161,8 +161,8 @@ Description=Voice-to-Text Telegram Bot
 After=network.target
 
 [Service]
-User=tgbotvtt
-Group=tgbotvtt
+User=youruser
+Group=youruser
 WorkingDirectory=/home/youruser/tg-bot-voice-to-text
 ExecStart=/home/youruser/tg-bot-voice-to-text/bin/vtt
 Restart=always
