@@ -1,134 +1,3 @@
-# Telegram Voice-to-Text Bot (@voicetotextnurik\_bot)
-
-This project is a Telegram bot that transcribes voice messages into text. The backend is written in Go, and the speech recognition models run as Python microservices using [whisper-instance-manager](https://github.com/justnurik/whisper-instance-manager).
-
-## Repositories
-
-- Bot (this repository): [`tg-bot-voice-to-text`](https://github.com/justnurik/tg-bot-voice-to-text)
-- Whisper instances: [`whisper-instance-manager`](https://github.com/justnurik/whisper-instance-manager)
-
-## Features
-
-- Transcription of voice messages via Whisper
-- Webhook-based interaction with Telegram API
-- Configuration via YAML
-- Easy build and launch
-- Supports multiple model instances
-- Logging and future support for product/technical/ML metrics
-
-## Project Structure
-
-```
-.
-├── bin/                    # Compiled Go binary
-├── config.yml              # Configuration file
-├── run.py                 # Python launcher script
-├── src/                   # Go source code
-├── webhook.pem  .key     # TLS certificate and key
-├── openssl.cnf            # OpenSSL config
-└── logs/, downloads/, ... # Other folders
-```
-
-## Configuration
-
-All settings are managed in `config.yml`:
-
-```yaml
-api_token: "YOUR_TELEGRAM_BOT_TOKEN"
-host_url: "https://YOUR_PUBLIC_IP"
-listen_port: 443
-cache_size: 10000
-log_file: "logs/bot.log"
-log_level: "info"
-debug: false
-model_instance_urls:
-  - "http://localhost:9000/inference"
-```
-
-## Certificates
-
-Telegram webhooks require HTTPS. A self-signed certificate is used:
-
-- `webhook.pem` — public certificate
-- `webhook.key` — private key
-
-> Your server's IP must be included in the **Subject Alternative Name (SAN)** field.
-
-Generate a certificate like this:
-
-```bash
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout webhook.key \
-  -out webhook.pem \
-  -config openssl.cnf \
-  -extensions req_ext
-```
-
-Example `openssl.cnf`:
-
-```ini
-[req]
-default_bits       = 2048
-prompt             = no
-default_md         = sha256
-req_extensions     = req_ext
-distinguished_name = dn
-
-[dn]
-CN = YOUR_PUBLIC_IP
-
-[req_ext]
-subjectAltName = @alt_names
-
-[alt_names]
-IP.1 = YOUR_PUBLIC_IP
-```
-
-## 🚀 Run
-
-1. Place `webhook.pem` and `webhook.key` in the project root
-2. Edit `config.yml`
-3. Launch with:
-
-```bash
-python3 run.py
-```
-
-## Metrics (in progress)
-
-Planned support for:
-
-### Technical
-
-- Model response time
-- Request volume
-- Errors
-- Load (Prometheus)
-
-### ML
-
-- Latency
-- Error rate
-- Throughput
-
-### Product
-
-- MAU, DAU, Retention
-
-## Telegram Bot
-
-Production bot: [@voicetotextnurik\_bot](https://t.me/voicetotextnurik_bot)
-
-## Requirements
-
-- Go 1.20+
-- Python 3.8+
-- Whisper instance manager
-
-## Feedback
-
-PRs and ideas welcome. Use GitHub Issues for bugs and feature requests.
-
 # Telegram Voice-to-Text Bot (@voicetotextnurik_bot)
 
 Этот проект представляет собой Telegram-бот, который преобразует голосовые сообщения в текст. Backend написан на Go, а модели распознавания речи работают как микросервисы на Python с использованием [whisper-instance-manager](https://github.com/justnurik/whisper-instance-manager).
@@ -142,87 +11,173 @@ PRs and ideas welcome. Use GitHub Issues for bugs and feature requests.
 
 - Транскрипция голосовых сообщений с помощью Whisper
 - Взаимодействие с Telegram API через вебхуки
+- Кэширование результатов обработки
 - Конфигурация через YAML
 - Простая сборка и запуск
 - Поддержка нескольких экземпляров моделей
-- Логирование и будущая поддержка продуктовых/технических/ML-метрик
+- Логгирование через Uber/zap
+- Будущая поддержка продуктовых/технических/ML-метрик
 
 ## Структура проекта
 
 ```
 .
-├── bin/                    # Скомпилированный бинарный файл Go
-├── config.yml              # Файл конфигурации
-├── run.py                 # Скрипт запуска на Python
-├── src/                   # Исходный код на Go
-├── webhook.pem  .key     # TLS-сертификат и ключ
-├── openssl.cnf            # Конфигурация OpenSSL
-└── logs/, downloads/, ... # Другие папки
+├── bin/                    # Скомпилированные бинарные файлы
+├── cmd/
+│   └── vtt/                # Основное приложение
+├── configs/                # Конфигурационные файлы
+│   ├── bot.yml             # Конфигурация бота
+│   └── logger.yml          # Конфигурация логгера
+├── internal/               # Внутренние пакеты
+│   └── vtt/                # Логика бота
+├── pkg/                    # Вспомогательные пакеты
+│   ├── botwork/            # Работа с Telegram API
+│   ├── cache/              # Кэширование
+│   ├── queue/              # Очереди
+│   ├── scheduler/          # Планировщики задач
+│   ├── setup/              # Утилиты инициализации
+│   └── utils/              # Вспомогательные утилиты
+├── Makefile                # Скрипты сборки
+├── go.mod                  # Зависимости Go
+├── go.sum                  # Контрольные суммы зависимостей
+└── README.md
 ```
 
 ## Конфигурация
 
-Все настройки задаются в файле `config.yml`:
+Конфигурация разделена на два файла:
 
+configs/bot.yml
 ```yaml
-api_token: "YOUR_TELEGRAM_BOT_TOKEN"
-host_url: "https://YOUR_PUBLIC_IP"
-listen_port: 443
-cache_size: 10000
-log_file: "logs/bot.log"
-log_level: "info"
+token: "YOUR_TELEGRAM_BOT_TOKEN"
+mode: "webhook" # или "longpoll"
+name: "VoiceToTextBot"
 debug: false
+listen_addr: ":8080"
+cache_size: 1000
+timeout: 60
 model_instance_urls:
-  - "http://localhost:9000/inference"
+  - "http://localhost:9000/transcriptions"
+  - "http://another-instance:9000/transcriptions"
 ```
 
-## Сертификаты
+configs/logger.yml
+```yaml
+add-stacktrace: true
+stacktrace-log-level: error
+add-caller: true
+console: true
+console-log-level: info
+log-files-config:
+- file-path: logs/bot.log
+  log-level: info
+  max-size: 1024
+  max-backups: 2
+  max-age: 30
+```
 
-Вебхуки Telegram требуют HTTPS. Используется самоподписанный сертификат:
+## Запуск программы бота
 
-- `webhook.pem` — публичный сертификат
-- `webhook.key` — приватный ключ
-
-> IP-адрес вашего сервера должен быть указан в поле **Subject Alternative Name (SAN)**.
-
-Генерация сертификата:
+Установите зависимости:
 
 ```bash
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout webhook.key \
-  -out webhook.pem \
-  -config openssl.cnf \
-  -extensions req_ext
+go mod tidy
 ```
 
-Пример `openssl.cnf`:
+Соберите бинарник:
+```bash
+make build
+```
+Запустите бота:
+```bash
+./bin/vtt # можно явно указать откуда брать конфиги: --bot-config=configs/bot.yml --logger-config=configs/logger.yml
+```
 
+## Запуск бота
+
+### Обеспечение HTTPS доступа
+Для работы с Telegram API через вебхуки необходимо обеспечить HTTPS соединение. Вот основные способы:
+
+1. Использование ngrok (для разработки/тестирования)
+```bash
+# Установите ngrok: https://ngrok.com/download
+ngrok http 8080
+```
+После запуска вы получите HTTPS-ссылку вида https://<random-id>.ngrok-free.app
+
+2. Настройка Nginx с Let's Encrypt (продакшн)
+```bash
+# Установите Nginx и Certbot
+sudo apt install nginx certbot python3-certbot-nginx
+
+# Создайте конфиг для домена
+sudo nano /etc/nginx/sites-available/yourdomen.com
+
+# Получите сертификат
+sudo certbot --nginx -d yourdomen.com
+
+# Перезапустите Nginx
+sudo systemctl reload nginx
+```
+
+3. Использование Docker с Traefik
+Пример docker-compose.yml:
+```yaml
+version: '3'
+services:
+  bot:
+    image: your-bot-image
+    ports:
+      - "8080:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bot.rule=Host(`yourdomain.com`)"
+      - "traefik.http.routers.bot.entrypoints=websecure"
+      - "traefik.http.routers.bot.tls.certresolver=myresolver"
+```
+
+### Установка вебхука
+
+После настройки HTTPS зарегистрируйте вебхук в Telegram API:
+```bash
+curl -F "url=https://yourdomen.com/voice-to-text-bot-webhook/webhook" \
+  "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/setWebhook"
+```
+
+Проверьте статус вебхука:
+```bash
+curl "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getWebhookInfo"
+```
+
+
+## Запуск в продакшн
+Рекомендуемые способы запуска:
+
+  1. Systemd сервис
+Создайте файл /etc/systemd/system/vtt-bot.service:
 ```ini
-[req]
-default_bits       = 2048
-prompt             = no
-default_md         = sha256
-req_extensions     = req_ext
-distinguished_name = dn
+[Unit]
+Description=Voice-to-Text Telegram Bot
+After=network.target
 
-[dn]
-CN = YOUR_PUBLIC_IP
+[Service]
+User=tgbotvtt
+Group=tgbotvtt
+WorkingDirectory=/home/youruser/tg-bot-voice-to-text
+ExecStart=/home/youruser/tg-bot-voice-to-text/bin/vtt
+Restart=always
+RestartSec=10
 
-[req_ext]
-subjectAltName = @alt_names
-
-[alt_names]
-IP.1 = YOUR_PUBLIC_IP
+[Install]
+WantedBy=multi-user.target
 ```
 
-## 🚀 Запуск
-
-1. Поместите `webhook.pem` и `webhook.key` в корень проекта
-2. Отредактируйте `config.yml`
-3. Запустите с помощью:
-
+2. Команды управления:
 ```bash
-python3 run.py
+sudo systemctl daemon-reload
+sudo systemctl enable vtt-bot
+sudo systemctl start vtt-bot
+sudo journalctl -u vtt-bot -f
 ```
 
 ## Метрики (в разработке)
@@ -256,6 +211,6 @@ python3 run.py
 - Python 3.8+
 - Whisper instance manager
 
-## Обратная связь
+## Лицензия
 
-Приветствуются пул-реквесты и идеи. Используйте GitHub Issues для сообщений об ошибках и запросов новых функций.
+Проект распространяется под лицензией [MIT](https://github.com/justnurik/tg-bot-voice-to-text/blob/main/LICENSE)
