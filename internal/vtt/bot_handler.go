@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 	"go.uber.org/zap"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -183,7 +182,7 @@ func (v SpeechToTextUpdateHandler) cacheHitCheck(bot *tgbotapi.BotAPI, message, 
 func (v SpeechToTextUpdateHandler) downloadFile(bot *tgbotapi.BotAPI, message, sentMsg *tgbotapi.Message, fileID string) (string, error) {
 	fileURL, err := bot.GetFileDirectURL(fileID)
 	if err != nil {
-		logrus.Errorf("error in get file direct url: [file id: %s] %v", fileID, err)
+		v.logger.Error("error in get file direct url", zap.String("file id", fileID), zap.Error(err))
 		if err := utils.EditMessage(bot, message.Chat.ID, message.MessageID, "Ошибка получения файла"); err != nil {
 			return "", fmt.Errorf("error in edit message: %v", err)
 		}
@@ -192,7 +191,7 @@ func (v SpeechToTextUpdateHandler) downloadFile(bot *tgbotapi.BotAPI, message, s
 
 	filePath, err := utils.DownloadFile(v.logger, fileURL, fmt.Sprintf("tmp_%s", uuid.New()))
 	if err != nil {
-		logrus.Errorf("error in download file: [file url: %s] %v", fileURL, err)
+		v.logger.Error("error in download file", zap.String("file url", fileURL), zap.Error(err))
 		if err := utils.EditMessage(bot, message.Chat.ID, sentMsg.MessageID, "Ошибка скачивания файла"); err != nil {
 			return "", fmt.Errorf("error in edit message: %v", err)
 		}
@@ -211,7 +210,7 @@ func (v SpeechToTextUpdateHandler) downloadFile(bot *tgbotapi.BotAPI, message, s
 func (v SpeechToTextUpdateHandler) transcription(bot *tgbotapi.BotAPI, message, sentMsg *tgbotapi.Message, filepath string) (string, error) {
 	transcription, err := v.stts.TransformSpeechToText(filepath)
 	if err != nil {
-		logrus.Errorf("error in transcription: [file path: %s] %v", filepath, err)
+		v.logger.Error("error in transcription", zap.String("file path", filepath), zap.Error(err))
 		if err := utils.EditMessage(bot, message.Chat.ID, sentMsg.MessageID, "Ошибка транскрипции в текст :("); err != nil {
 			return "", fmt.Errorf("error in edit message: %v", err)
 		}
