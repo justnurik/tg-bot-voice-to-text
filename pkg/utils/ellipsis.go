@@ -5,7 +5,7 @@ func Ellipsis(text string, end int) string {
 		return ""
 	}
 
-	if len(text) <= end {
+	if len(text) >= end {
 		return text[:end]
 	}
 
