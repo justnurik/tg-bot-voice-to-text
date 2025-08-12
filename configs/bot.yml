@@ -1,10 +1,8 @@
+token: ""
 mode: "webhook"
-name: "analyzerbot"
-listen_addr: ":443"
-host_url: "bot.example.com"
+name: "voice-to-text-bot"
+listen_addr: ":8080"
 debug: false
-timeout: 60
-cert_path: "/etc/certs/webhook.pem"
-key_path: "/etc/certs/webhook.key"
-model_urls:
-  - "http://your-machine:6029"
+cache_size: 10000
+model_instance_urls:
+  :- "http://localhost:6029"
