@@ -105,12 +105,13 @@ func (e *WebHookBot) newWebhookHandler() func(http.ResponseWriter, *http.Request
 		}
 		defer utils.CloserErrorHandle(logger, r.Body, "error closing body")
 
-		logger.Info("start update handler")
-		if err := e.uh.UpdateHandle(e.bot, &update); err != nil {
-			logger.Error("error in one update handler", zap.Error(err))
-			http.Error(w, fmt.Errorf("error in one update handler: %v", err).Error(), http.StatusInternalServerError)
-		}
-		logger.Info("finish update handler")
+		go func() {
+			logger.Info("start update handler")
+			if err := e.uh.UpdateHandle(e.bot, &update); err != nil {
+				logger.Error("error in one update handler", zap.Error(err))
+			}
+			logger.Info("finish update handler")
+		}()
 	}
 
 	return handler
