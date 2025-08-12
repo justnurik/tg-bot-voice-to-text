@@ -153,7 +153,12 @@ curl "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getWebhookInfo"
 ## Запуск в продакшн
 Рекомендуемые способы запуска:
 
-1. Systemd сервис
+1. nohup
+```bash
+nohup ./bin/vtt  > output.txt 2>&1 &
+```
+
+3. Systemd сервис
 Создайте файл /etc/systemd/system/vtt-bot.service:
 ```ini
 [Unit]
