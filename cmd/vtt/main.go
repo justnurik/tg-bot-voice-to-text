@@ -68,7 +68,12 @@ func main() {
 
 	logger.Info("Initializing STT service",
 		zap.Int("worker_count", len(cfg.ModelInstanceURLs)))
-	sttService := stt.NewSTTServiceWithScheduler(logger, stt.STTClientDefault{}, sched, cfg.ModelInstanceURLs)
+	sttService := stt.NewSTTServiceWithScheduler(
+		logger,
+		stt.STTClientDefault{Logger: logger},
+		sched,
+		cfg.ModelInstanceURLs,
+	)
 
 	logger.Info("Creating update handler")
 	uh, err := vtt.NewVoiceToTextUpdateHandler(logger, sttService, fileIDCache)

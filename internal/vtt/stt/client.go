@@ -16,12 +16,12 @@ import (
 )
 
 type STTClientDefault struct {
-	logger *zap.Logger
+	Logger *zap.Logger
 }
 
 func (s STTClientDefault) Request(filePath, url string) (string, error) {
 	startTime := time.Now()
-	log := s.logger.With(
+	log := s.Logger.With(
 		zap.String("worker_url", url),
 		zap.String("file_path", filePath),
 	)
