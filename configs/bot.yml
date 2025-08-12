@@ -5,4 +5,4 @@ listen_addr: ":8080"
 debug: false
 cache_size: 10000
 model_instance_urls:
-  :- "http://localhost:6029"
+  - "http://localhost:6029"

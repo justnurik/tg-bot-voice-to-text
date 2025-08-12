@@ -20,6 +20,7 @@ const (
 )
 
 type WebHookBot struct {
+	name   string
 	logger *zap.Logger
 
 	bot *tgbotapi.BotAPI
@@ -38,6 +39,7 @@ func NewWebHookBot(logger *zap.Logger, name string, apiToken string, uh UpdateHa
 	logger.Info("create new webhook bot")
 
 	return &WebHookBot{
+		name:   name,
 		logger: logger,
 		bot:    bot,
 		uh:     uh,
@@ -46,7 +48,7 @@ func NewWebHookBot(logger *zap.Logger, name string, apiToken string, uh UpdateHa
 
 func (w *WebHookBot) Start(ctx context.Context, listenAddr string) error {
 	mux := http.NewServeMux()
-	mux.Handle("/webhook/bot2", w.loggingMiddleware(http.HandlerFunc(w.newWebhookHandler())))
+	mux.Handle(fmt.Sprintf("/webhook/%s", w.name), w.loggingMiddleware(http.HandlerFunc(w.newWebhookHandler())))
 
 	server := &http.Server{
 		Addr:    listenAddr,
