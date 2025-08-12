@@ -48,7 +48,7 @@ func NewWebHookBot(logger *zap.Logger, name string, apiToken string, uh UpdateHa
 
 func (w *WebHookBot) Start(ctx context.Context, listenAddr string) error {
 	mux := http.NewServeMux()
-	mux.Handle("/webhook", w.loggingMiddleware(http.HandlerFunc(w.newWebhookHandler())))
+	mux.Handle(fmt.Sprintf("/%s-webhook", w.name), w.loggingMiddleware(http.HandlerFunc(w.newWebhookHandler())))
 
 	server := &http.Server{
 		Addr:    listenAddr,
